@@ -6,15 +6,29 @@ public class TestFile {
         boolean done = false;
         BasicFile f;
 
-        String menu = "Enter option\n1. OpenFile\n2. ...\n4. Quit";
+
         while (!done){
-            String s = JOptionPane.showInputDialog(menu);
+
+            int i = GetData.getInt("Enter option\n1. OpenFile\n2. ...\n4. Quit");
 
             try{
-                int i = Integer.parseInt(s);
+
                 switch (i){
                     case 1:
                         f = new BasicFile();
+                        int j = GetData.getInt("1.Copy the file\n2. Get Attributes\n.7 Exit");
+                        switch (j){
+                            case 1:
+                                f.copy();
+                                break;
+                            case 2:
+                               JOptionPane.showMessageDialog(null,f.getAbsolutePath());
+                               break;
+                            case 7:
+                                break;
+                            default:
+                                JOptionPane.showMessageDialog(null, "Sorry that option is not defined, try a different one","Error",JOptionPane.ERROR_MESSAGE);
+                        }
                         break;
                     case 4:
                         done = true;
