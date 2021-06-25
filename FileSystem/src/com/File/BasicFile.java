@@ -2,14 +2,13 @@ package com.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.File;
+import java.io.*;
 import java.nio.file.Files;
 
 public class BasicFile {
         File f;
         private String absolutePath;
+        private double fileSize;
 
 
         public BasicFile(){
@@ -55,6 +54,46 @@ public class BasicFile {
         public String getAbsolutePath(){
            this.absolutePath = f.getAbsolutePath();
            return this.absolutePath;
+        }
+
+        public double fileSize(){
+           this.fileSize = f.length()/1000;
+            return fileSize;
+        }
+
+        public String getPaths(){
+            String result="";
+            try {
+                File dir = new File(this.f.getAbsolutePath().split(this.f.getName())[0]);
+                File[] files = dir.listFiles();
+                int i=0;
+                while (i<files.length){
+                    if(files[i].isFile())
+                        result+= "File "+files[i].getName()+" is in "+ files[i].getAbsolutePath()+"\n";
+                    else result+= "Directory "+files[i].getName()+" is in "+ files[i].getAbsolutePath()+"\n";
+                    i++;
+                }
+            }catch (NullPointerException e){
+                JOptionPane.showMessageDialog(null, "You didn't choose a file\n [Error message]: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+            return result;
+        }
+
+        public String numberOfLines(){
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(f.getName()));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            int lines = 0;
+            try {
+                while (reader.readLine() != null) lines++;
+                reader.close();
+            }catch (IOException e){
+
+            }
+            return Integer.toString(lines);
         }
 
         void display(String msg, String s, int t){
