@@ -3,15 +3,20 @@ package com.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+
 public class BasicFile {
+        //reference variable to store the chosen file
         File f;
-        private String absolutePath;
-        private double fileSize;
 
-
-        public BasicFile(){
+    /**
+     * Parameterless constructor
+     * Uses JFileChooser to allow user to select a file
+     * from the root directory of the program
+     */
+    public BasicFile(){
             JFileChooser choose = new JFileChooser(".");
             int status = choose.showOpenDialog(null);
 
@@ -34,7 +39,12 @@ public class BasicFile {
                 display("Approve option was not selected", e.toString(), JOptionPane.ERROR_MESSAGE);
             }
         }
-        public void copy(){
+
+    /**
+     * A method that copies the selected file into the same directory
+     * with the same file name plus COPY added at the end of the name
+     */
+    public void copy(){
             if(f.isFile()) {
                 String fileName = f.getName().split("\\.",2)[0]+"Copy";
                 String extension = "."+f.getName().split("\\.",2)[1];
@@ -51,16 +61,49 @@ public class BasicFile {
             }else{display("What you selected is not a file","ERROR",JOptionPane.ERROR_MESSAGE);}
         }
 
+    /**
+     * Writes to an output file with a name Given by user
+     * @param fileName name of the output file
+     * @param append if true, content is appended to the file,
+     *              if false content is overwritten
+     */
+    public void writeToFile(String fileName,boolean append){
+            try {
+                String read = "";
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                BufferedWriter bw = new BufferedWriter(new FileWriter(fileName+".txt", StandardCharsets.UTF_8,append));
+                while((read = br.readLine()) != null)
+                    bw.write(read+"\n");
+                br.close();
+                bw.close();
+            }catch(FileNotFoundException e){
+                display("File was not found\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }catch (IOException e){
+                display("Input error\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        /**
+         * A method to get the path of the selected file
+         * @return returns the path of the file
+         */
         public String getAbsolutePath(){
-           this.absolutePath = f.getAbsolutePath();
-           return this.absolutePath;
+           return f.getAbsolutePath();
         }
 
+        /**
+         * A method to get the size in kilobytes of the file
+         * @return returns the size in kilobytes of the file as a double
+         */
         public double fileSize(){
-           this.fileSize = f.length()/1000;
-            return fileSize;
+            return f.length()/1000;
         }
 
+        /**
+         * A method to get the path of all the files in
+         * the directory of the selected file
+         * @return returns the path of the file or directory as a String
+         */
         public String getPaths(){
             String result="";
             try {
@@ -74,11 +117,15 @@ public class BasicFile {
                     i++;
                 }
             }catch (NullPointerException e){
-                JOptionPane.showMessageDialog(null, "You didn't choose a file\n [Error message]: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+                display("You didn't choose a file\n [Error message]: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
             }
             return result;
         }
 
+        /**
+         * A method to get the number of lines of a text file
+         * @return returns the number of lines of the selected file as a String
+         */
         public String numberOfLines(){
             BufferedReader reader = null;
             try {
@@ -96,6 +143,119 @@ public class BasicFile {
             return Integer.toString(lines);
         }
 
+        /**
+         * A method to get the content of a file
+         * @return returns the content of the selected file as a String
+         */
+        public String displayContent(){
+            String read;
+            String result="";
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                while (( read= br.readLine())!= null)
+                    result += read + "\n";
+                br.close();
+            }catch(FileNotFoundException e){
+                display("File was not found\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }catch (IOException e){
+                display("Input error\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+            return result;
+        }
+
+    /**
+     * A method to search for a String inside of the selected file
+     * @param key the String to search for
+     * @return returns all the lines where the string was found
+     */
+    public String search(String key){
+            String read = "";
+            String result= "";
+            int lineNumber = 0;
+
+            try{
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                while((read = br.readLine()) != null) {
+                    lineNumber++;
+                    String[] arr = read.split(" ");
+
+                        for(int count = 0;count < arr.length;count++){
+                        if(arr[count].equalsIgnoreCase(key)){
+                            result += Integer.toString(lineNumber)+": "+read+"\n";
+                            break;
+                        }
+                    }
+                }
+                br.close();
+            }catch(FileNotFoundException e){
+                display("File was not found\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }catch (IOException e){
+                display("Input error\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+            return result;
+        }
+
+    /**
+     * This method tokenizes the text inside of the
+     * selected text file and recognizes many of the keyboard symbols
+     * @return the string with all the tokens in new lines
+     */
+    public String  tokenize(){
+        String result = "";
+            try{
+                StreamTokenizer st = new StreamTokenizer(new FileReader(f));
+
+                st.eolIsSignificant(true);
+                st.wordChars('"','"');
+                st.wordChars('@','@');
+                st.wordChars(',',',');
+                st.wordChars('\'','\'');
+                st.wordChars('!','!');
+                st.wordChars('/','/');
+                st.wordChars('\\','\\');
+                st.wordChars('%','%');
+                st.wordChars('&','&');
+                st.wordChars('$','$');
+                st.wordChars('#','#');
+                st.wordChars('*','*');
+                st.wordChars('(','(');
+                st.wordChars(')',')');
+                st.wordChars('+','+');
+                st.wordChars('-','-');
+                st.wordChars('=','=');
+                st.wordChars('{','{');
+                st.wordChars('}','}');
+                st.lowerCaseMode(true);
+
+                while (st.nextToken() != StreamTokenizer.TT_EOF){
+                    switch (st.ttype){
+                        case StreamTokenizer.TT_WORD:
+                            result += st.sval+"\n";
+                            break;
+                        case StreamTokenizer.TT_NUMBER:
+                            result  += Double.toString(st.nval)+"\n";
+                            break;
+                        case StreamTokenizer.TT_EOL:
+                            result += "\tNew Line-->"+ st.sval + (char) st.ttype;
+                            break;
+                        default:
+                            result+= (char)st.ttype + "++> not recognize"+"\n";
+                    }
+                }
+            }catch(FileNotFoundException e){
+                display("File was not found\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }catch (IOException e){
+                display("Input error\nerror message: "+e.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+            return result;
+        }
+
+        /**
+         * A method that displays a message in a JOptionPane window
+         * @param msg the message to output
+         * @param s the title of the window
+         * @param t the type of message to be displayed (e.g. Error , Information etc)
+         */
         void display(String msg, String s, int t){
             JOptionPane.showMessageDialog(null, msg, s, t);
         }
