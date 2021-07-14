@@ -1,5 +1,3 @@
-package com.File;
-
 import javax.swing.*;
 
 public class GetData {
